@@ -1,20 +1,53 @@
 <?xml version="1.0"?>
 <project name="My logger" basedir=".">
-	<target name = "compile">
-		<mkdir dir="./builds/classes"/>
-		<javac srcdir="src" destdir="./builds/classes"/>
+	<target name="init">
+		<echo>"BUILDING PROGRESS INITIATED"</echo>
 	</target>
-
-	<target name = "package">
+	<target name = "compile" depends="init" description="Compiles the production code">
+		<mkdir dir="./builds/classes"/>
+		<javac srcdir="src" destdir="./builds/classes"  classpath="./lib/*.jar" fork="true" includeantruntime="false"/>
+	</target>
+	<path id="production">
+		<pathelement location="./builds/classes"/>
+	</path>
+	<path id="libs">
+ 		 <fileset dir="./lib" includes="**/*.jar"/>     		
+ 	</path>	
+	<path id="dependencies">
+		<path refid="production"/>
+		<path refid="libs"/>
+	</path>		
+	<target name="compile-tests" depends="compile" description="Compiles the tests">
+		<mkdir dir="./test/classes"/>
+		<javac srcdir="test" destdir="./builds/classes" fork="true" includeantruntime="false" >
+			<classpath refid="dependencies"/>
+		</javac>
+	</target>
+	<target name="run-tests" depends="compile-tests" description="Run all tests">
+		<junit printsummary="yes" haltonfailure="yes"> 
+			<classpath>
+				<pathelement location="./builds/classes"/>
+				<pathelement location="./lib/junit-4.11.jar"/>
+				<pathelement location="./lib/mockito-all-1.9.5-rc1.jar"/>
+			</classpath>
+			<test name="ant.MyLoggerClassTest" haltonfailure="no" outfile="result" todir="." >
+				<formatter type="plain"/>
+			</test>  							
+		</junit>
+	</target>
+	<target name="package"  depends="compile" description="The Packaging Process" >
  		<mkdir dir="./builds/jar"/>
-		<jar destfile="./builds/jar/MyLogger.jar" basedir="builds/classes">
+		<jar destfile="./builds/jar/MyLogger.jar"  basedir="builds/classes">
 			<manifest>
 				<attribute name="Main-Class" value="ant.MyMainClass"/>
 			</manifest>
 		</jar>
 	</target>
-
-	<target name ="run">
+	<target name ="run"  depends="package" description="Executes our application" >
 		<java jar="./builds/jar/MyLogger.jar" fork="true"/>
 	</target>
+	<target name="clean" description="Removes all generated files.">
+		<delete dir="./builds"/>
+		<delete dir="./test/classes"/>
+	</target>	
 </project>
