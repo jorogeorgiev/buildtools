@@ -1,0 +1,20 @@
+<?xml version="1.0"?>
+<project name="My logger" basedir=".">
+	<target name = "compile">
+		<mkdir dir="./builds/classes"/>
+		<javac srcdir="src" destdir="./builds/classes"/>
+	</target>
+
+	<target name = "package">
+ 		<mkdir dir="./builds/jar"/>
+		<jar destfile="./builds/jar/MyLogger.jar" basedir="builds/classes">
+			<manifest>
+				<attribute name="Main-Class" value="ant.MyMainClass"/>
+			</manifest>
+		</jar>
+	</target>
+
+	<target name ="run">
+		<java jar="./builds/jar/MyLogger.jar" fork="true"/>
+	</target>
+</project>
